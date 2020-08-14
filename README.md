@@ -1,11 +1,16 @@
 # delete-duplicate-emails
 
-This library can be used for 2 email accounts where the source account used to forward to the destination account and should now be deleted in the destination account and only remain in the source account.
+This library can be used for 2 email accounts where the source account was used to forward emails to the destination account which should now be deleted in the destination account and only remain in the source account.
 
+## Disclaimer
+
+All the functions above do work but are brittle due to the fact that no error handling is implemented and furthermore the clojure-mail dependency is using an older version of JavaMail, upgrading it and implementing proper error handling like an adult might be advisable if anyone wants to use this base for something more serious.
 
 ## Usage
 
-FIXME
+Fill in your credentials for the source and destination account in `src/delete_duplicate_emails/config.clj`.
+Then fire up your REPL and invoke `(load-messages-from-source)` to iterate through the emails in the source account and save some of their metadata into the local CRUX instance.
+Finally to delete the duplicate emails in the destination account run `(remove-duplicates-from-destination)`.
 
 ## License
 
