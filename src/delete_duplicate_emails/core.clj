@@ -5,9 +5,8 @@
             [crux.api :as crux]
             [clojure.java.io :as io]
             [clojure.string :as str]
-            [edn-query-language.core :as eql]
             [delete-duplicate-emails.config :as config])
-  (:import [javax.mail Flags Flags$Flag UIDFolder]
+  (:import [javax.mail Flags$Flag]
            (com.sun.mail.imap IMAPStore)))
 
 ;; Start a Crux Node which will be used to store the emails in from the IMAP server which will keep the email.
@@ -88,24 +87,23 @@
   (time
     (doseq [message source-inbox]
       (let [parsed-message (read-message message)]
-        (do
-          #_(println "inserted" (:id parsed-message) "with subject" (:subject parsed-message))
-          (crux/submit-tx node
-            [[:crux.tx/put
-              {:crux.db/id (keyword (:id parsed-message))
-               :message/id (:id parsed-message)
-               :message/from (:from parsed-message)
-               :message/sender (:sender parsed-message)
-               :message/to (:to parsed-message)
-               :message/subject (:subject parsed-message)
-               :message/date-sent (:date-sent parsed-message)
-               :message/date-received (:date-received parsed-message)}]]))))))
+        #_(println "inserted" (:id parsed-message) "with subject" (:subject parsed-message))
+        (crux/submit-tx node
+          [[:crux.tx/put
+            {:crux.db/id (keyword (:id parsed-message))
+             :message/id (:id parsed-message)
+             :message/from (:from parsed-message)
+             :message/sender (:sender parsed-message)
+             :message/to (:to parsed-message)
+             :message/subject (:subject parsed-message)
+             :message/date-sent (:date-sent parsed-message)
+             :message/date-received (:date-received parsed-message)}]])))))
 
 (defn remove-duplicates-from-destination
   "Function that can be used from the REPL to iterate over the emails in the destination and delete the email if has an entry in the CRUX DB."
   []
   (let [number-of-emails (count destination-inbox)]
-    (do (println "Found" number-of-emails "emails in the destination, starting to look and deleting duplicates..."))
+    (println "Found" number-of-emails "emails in the destination, starting to look and deleting duplicates...")
     (->> destination-inbox
       (map (fn [message]
              [message (read-message message)]))
@@ -115,10 +113,9 @@
              (clojure.pprint/pprint (nth (first output) 1))
              (mark-deleted (nth (first output) 0)))))
       (map (fn [email]
-             (do
-               (mark-deleted (nth email 0))
-               (let [parsed-message (nth email 1)]
-                 (println "Deleted email with id" (:id parsed-message) "from" (:address (first (:from parsed-message))) "with subject \"" (:subject parsed-message) "\"received at" (:date-received parsed-message))))))
+             (mark-deleted (nth email 0))
+             (let [parsed-message (nth email 1)]
+               (println "Deleted email with id" (:id parsed-message) "from" (:address (first (:from parsed-message))) "with subject \"" (:subject parsed-message) "\"received at" (:date-received parsed-message)))))
       doall)
     (println "done")))
 
